@@ -27,7 +27,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity { // 고객용 mainactivity
     private DrawerLayout drawerLayout;
     private View drawerView;
 
@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             try {
-                String site = "http://192.168.219.100/reservation.php";
+                String site = "http://192.168.0.84/reservation.php";
                 URL url = new URL(site);
                 //접속
                 URLConnection conn = url.openConnection();

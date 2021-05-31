@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import android.widget.Button;
@@ -42,24 +43,33 @@ public class LoginActivity extends AppCompatActivity {
         Thread thread = new Thread(runnable);
         thread.start();
 
-        Button btnLogin = (Button) findViewById(R.id.btnLogin);
+        Button btnLogin = findViewById(R.id.btnLogin);
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 boolean success = login();
+                boolean adminsuccess = isadminlogin();;
+
                 if (success) {
-                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    if(adminsuccess){
+                    Intent intent = new Intent(LoginActivity.this, StaticisActivity.class);//후에 adminactivity로 바꿀거임
+                    intent.putExtra("name",who.getName());
+                     intent.putExtra("id",who.getID());
+                    startActivity(intent);}
+                    else
+                    { Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                     intent.putExtra("name",who.getName());
                     intent.putExtra("id",who.getID());
-                    startActivity(intent);
-                } else {
+                    startActivity(intent);}
+                    }
+                else {
                     onClickShowAlert(view);
                 }
             }
         });
 
-        TextView linkRegister = (TextView) findViewById(R.id.linkRegister);
+        TextView linkRegister = findViewById(R.id.linkRegister);
         linkRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -91,31 +101,42 @@ public class LoginActivity extends AppCompatActivity {
 
 
     public boolean login() {
-        email = (EditText) findViewById(R.id.email);
-        password = (EditText) findViewById(R.id.password);
+        email = findViewById(R.id.email);
+        password = findViewById(R.id.password);
         u_email = email.getText().toString();
         u_password = password.getText().toString();
-        for (int i = 0; i < userArray.size(); i++) {
-            if (u_email.equals(userArray.get(i).getID()) && u_password.equals(userArray.get(i).getPw())) {
+
+         for (int i = 0; i < userArray.size(); i++) {
+               if (u_email.equals(userArray.get(i).getID()) && u_password.equals(userArray.get(i).getPw())) {
                 who = new User(userArray.get(i).getID(), userArray.get(i).getPw(), userArray.get(i).getName(), userArray.get(i).getPhoneNumber(),
                         userArray.get(i).getPenalty(), userArray.get(i).getAdmin());
+
                 return true;
             }
         }
         return false;
     }
 
+    public boolean isadminlogin() {
+        for (int i = 0; i < userArray.size(); i++) {
+            if (userArray.get(i).getAdmin().equals("T")) {
+                 return true;
+            }
+
+       }
+return false;
+    }
     Runnable runnable = new Runnable() { //출처: https://javapp.tistory.com/132
         @Override
         public void run() {
             try {
-                String site = "http://192.168.219.100/user_inform.php";
+                String site = "http://192.168.0.84/user_inform.php";
                 URL url = new URL(site);
                 //접속
                 URLConnection conn = url.openConnection();
                 //서버와 연결되어 있는 스트림을 추출
                 InputStream is = conn.getInputStream();
-                InputStreamReader isr = new InputStreamReader(is, "UTF-8");
+                InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
                 BufferedReader br = new BufferedReader(isr);
 
                 String str = null;
@@ -143,9 +164,10 @@ public class LoginActivity extends AppCompatActivity {
                     test[i] = test[i].replace("\"penalty\":", "");
                     test[i] = test[i].replace("\"admin\":", "");
                     test[i] = test[i].replace("\"", "");
-                    String inform[] = test[i].split(",");
+                    String[] inform = test[i].split(",");
                     userArray.add(new User(inform[0], inform[1], inform[2], inform[3], inform[4], inform[5]));
                 }
+
 
 
             } catch (Exception e) {
